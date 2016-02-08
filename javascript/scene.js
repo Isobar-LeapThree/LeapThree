@@ -44,12 +44,9 @@
   var origin = new THREE.Vector3(0, 0, 0);
   window.camera.lookAt(origin);
 
-  renderer = new THREE.WebGLRenderer({
-    antialias: true
-  });
-
+  renderer = new THREE.WebGLRenderer();
+  renderer.setClearColor(0xEEEEEE, 1);
   renderer.setSize(window.innerWidth, window.innerHeight);
-
   renderer.shadowMapEnabled = true;
 
   document.body.appendChild(renderer.domElement);
@@ -127,13 +124,16 @@
 
   scene.add(mainLight);
 
+  scope.spotLight = new THREE.SpotLight(0xFFFFFF);
+  scope.spotLight.position.set( 200, 60, -10);
+  scope.spotLight.castShadow = true;
+
+  //scene.add(scope.spotLight);
+
   render = function() {
 
     //var originPoint = block.position.clone();
     var originPoint = leapBall.position.clone();
-
-    var collisionTargets = pickupables; //dropables;
-
     //ballCollision = false;
     var block_col = false;
     var cube_col = false;
