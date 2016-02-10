@@ -141,6 +141,7 @@
 
   //wireMatrix.itemAt(0, 3, 0).material.visible = true;
 
+  var lastCube = false;
   render = function() {
 
     //var originPoint = block.position.clone();
@@ -274,7 +275,16 @@
     }
 
     if(wireMatrix) {
-      wireMatrix.itemAt(0, 3, 0).material.visible = true;
+      // wireMatrix.itemAt(0, 3, 0).material.visible = true;
+      if(lastCube) lastCube.material.visible = false;
+      var nearestCords = {
+                          x: constrain(Math.round(scope.leapPosition.x), 0, 10),
+                          y: constrain(Math.round(scope.leapPosition.y), 0, 10),
+                          z: constrain(Math.round(scope.leapPosition.z), 0, 10)
+                        };
+
+      lastCube = wireMatrix.itemAt(nearestCords.x, nearestCords.y, nearestCords.x);
+      lastCube.material.visible = true;
     }
 
 
@@ -284,6 +294,10 @@
   };
 
   render();
+
+  function constrain(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  }
 
   function make_block(config) {
 
@@ -302,7 +316,7 @@
 
     var b = new THREE.Mesh(
       new THREE.BoxGeometry(cubeUnit, cubeUnit, cubeUnit),
-      new THREE.MeshLambertMaterial({color: colors.green, wireframe: true})
+      new THREE.MeshLambertMaterial({color: colors.red, wireframe: true})
     );
     b.castShadow = false;
     b.receiveShadow = false;
