@@ -11,6 +11,13 @@
 
   var leapBallHome = new THREE.Vector3(-4, .125, -4);
 
+  var cubeUnit = 1;
+  var snapMatrix = new Matrix3D(10);
+  var positionMatrix = new Matrix3D(10)
+  populatePositions(positionMatrix, 1);
+
+  var wireMatrix = new Matrix3D(10);
+
 
   var colors = {
     white: 0xffffff,
@@ -129,6 +136,10 @@
   scope.spotLight.castShadow = true;
 
   //scene.add(scope.spotLight);
+
+  buildSnapGrid(positionMatrix, wireMatrix);
+
+  //wireMatrix.itemAt(0, 3, 0).material.visible = true;
 
   render = function() {
 
@@ -262,6 +273,10 @@
       }, 1000);
     }
 
+    if(wireMatrix) {
+      wireMatrix.itemAt(0, 3, 0).material.visible = true;
+    }
+
 
 
     renderer.render(scene, camera);
@@ -271,14 +286,113 @@
   render();
 
   function make_block(config) {
+
     var b = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.BoxGeometry(cubeUnit, cubeUnit, cubeUnit),
       new THREE.MeshLambertMaterial(config)
     );
+
     b.castShadow = true;
     b.receiveShadow = true;
 
     return b;
   }
 
+  function make_wire_block() {
+
+    var b = new THREE.Mesh(
+      new THREE.BoxGeometry(cubeUnit, cubeUnit, cubeUnit),
+      new THREE.MeshLambertMaterial({color: colors.green, wireframe: true})
+    );
+    b.castShadow = false;
+    b.receiveShadow = false;
+
+    return b;
+  }
+
+  // Position Matrix must be populated
+  function buildSnapGrid(matrixPostions, matrixStorage) {
+    if(! matrixPostions.itemAt(0,0,0).hasOwnProperty('x')) throw new Error('Postions for snap grid not available');
+
+    for(var x = 0; x < matrixPostions.units; x++) {
+
+      for(var y = 0; y < matrixPostions.units; y++) {
+
+        for(var z = 0; z < matrixPostions.units; z++) {
+          var wire = make_wire_block();
+          wire.position.set(x, y, z);
+          wire.material.visible = false;
+          if(matrixStorage) matrixStorage.itemAt(x, y, z, wire);
+          scene.add(wire);
+          //matrix.itemAt(x, y, z, {x: x * cubeSize, y: y * cubeSize, z: z * cubeSize});
+        }
+      }
+
+    }
+
+  }
+
+  function populatePositions(matrix, cubeSize) {
+
+    for(var x = 0; x < matrix.units; x++) {
+
+      for(var y = 0; y < matrix.units; y++) {
+
+        for(var z = 0; z < matrix.units; z++) {
+
+          matrix.itemAt(x, y, z, {x: x * cubeSize, y: y * cubeSize, z: z * cubeSize});
+        }
+      }
+
+    }
+  }
+
 }).call(this);
+
+
+
+function Matrix3D(units) {
+
+  var makeZ = function(len, posX, posY) {
+    var z = [];
+    for(var i = 0; i < len; i++) {
+      z[i] = 'x' + posX + 'y' + posY + 'z' + i;
+    }
+    return z;
+  };
+
+  var makeY = function(len, posX) {
+    var y = [];
+    for(var i = 0; i < len; i++) {
+      y[i] = makeZ(len, posX, i);
+    }
+    return y;
+  };
+
+  var makeX = function(len) {
+    var x = [];
+    for(var i = 0; i < len; i++) {
+      x[i] = makeY(len, i);
+    }
+    return x
+  }
+
+  this.units = units;
+
+  this.matrix = makeX(this.units);
+
+  this.itemAt = function(x, y, z, val) {
+    if(x > this.units || x < 0) throw new Error("Value exceedes X bounds:", x);
+    if(y > this.units || y < 0) throw new Error("Value exceedes Y bounds:", y);
+    if(z > this.units || z < 0) throw new Error("Value exceedes Z bounds:", z);
+
+    if(val) this.matrix[x][y][z] = val;
+    return this.matrix[x][y][z];
+  };
+
+  this.getMatrix = function() {
+    return matrix;
+  }
+
+  return this;
+}
