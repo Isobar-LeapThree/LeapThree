@@ -72,6 +72,24 @@
   window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
   window.camera.position.set(-5, 5, 10);
 
+
+  controls = new THREE.TrackballControls( window.camera );
+
+  controls.rotateSpeed = 1.0;
+  controls.zoomSpeed = 1.2;
+  controls.minDistance = 5;
+  controls.maxDistance = 100;
+
+  controls.noZoom = false;
+  controls.noPan = true;
+
+  controls.staticMoving = false;
+  controls.dynamicDampingFactor = 0.3;
+
+  controls.keys = [ 65, 83, 68 ]; // A S D
+
+  //controls.addEventListener( 'change', render );
+
   var axes = new THREE.AxisHelper(5);
   scene.add(axes);
 
@@ -323,12 +341,14 @@
     }
 
 
-
+    controls.update();
     renderer.render(scene, camera);
     return requestAnimationFrame(render);
   };
 
   render();
+
+  //controls.addEventListener( 'change', render );
 
   function constrain(val, min, max) {
     return Math.min(Math.max(val, min), max);
@@ -416,6 +436,19 @@
 
 }).call(this);
 
+var Actors = (function(){
+
+  return {
+
+  };
+})();
+
+var Controls = (function(){
+
+  return {
+
+  };
+});
 
 
 function Matrix3D(units) {
