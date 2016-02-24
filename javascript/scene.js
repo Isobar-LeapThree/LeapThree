@@ -9,6 +9,11 @@ window.scope = window.scope || {};
   radious = 1600, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60,
   isShiftDown = false;
 
+  var DIMENSIONS = {
+    unit: 50,
+    halfUnit: 25
+  };
+
   init();
   render();
 
@@ -45,11 +50,11 @@ window.scope = window.scope || {};
     for ( var i = 0; i <= 20; i ++ ) {
 
       var line = new THREE.Line( geometry, linesMaterial );
-      line.position.z = ( i * 50 ) - 500;
+      line.position.z = ( i * DIMENSIONS.unit ) - 500;
       scene.addObject( line );
 
       var line = new THREE.Line( geometry, linesMaterial );
-      line.position.x = ( i * 50 ) - 500;
+      line.position.x = ( i * DIMENSIONS.unit ) - 500;
       line.rotation.y = 90 * Math.PI / 180;
       scene.addObject( line );
 
@@ -61,7 +66,7 @@ window.scope = window.scope || {};
     plane.rotation.x = - 90 * Math.PI / 180;
     scene.addObject( plane );
 
-    cube = new Cube( 50, 50, 50 );
+    cube = setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit );
 
     ray = new THREE.Ray( camera.position, null );
 
@@ -113,10 +118,21 @@ window.scope = window.scope || {};
 
   }
 
+  function setShape(width, height, depth) {
+    if( (width + height + depth) / 3 > DIMENSIONS.unit ) {
+      return new Cuboid( width, height, depth );
+    } else {
+      return new Cube( DIMENSIONS.unit );
+    }
+
+  }
+
   function onDocumentKeyDown( event ) {
 
+    console.log("[KEYCODE]", event.keyCode);
     switch( event.keyCode ) {
 
+      // Number Keys
       case 49: setBrushColor( 0 ); break;
       case 50: setBrushColor( 1 ); break;
       case 51: setBrushColor( 2 ); break;
@@ -128,12 +144,18 @@ window.scope = window.scope || {};
       case 57: setBrushColor( 8 ); break;
       case 48: setBrushColor( 9 ); break;
 
+      // Shift
       case 16: isShiftDown = true; interact(); render(); break;
 
+      // Arrow Keys
       case 37: offsetScene( - 1, 0 ); break;
       case 38: offsetScene( 0, - 1 ); break;
       case 39: offsetScene( 1, 0 ); break;
       case 40: offsetScene( 0, 1 ); break;
+
+      // - +
+      case 189: cube = setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+      case 187: cube = setShape( DIMENSIONS.unit * 2, DIMENSIONS.unit, DIMENSIONS.unit ); break;
 
     }
 
@@ -224,9 +246,9 @@ window.scope = window.scope || {};
           var position = new THREE.Vector3().add( intersect.point, intersect.object.matrixRotation.transform( intersect.face.normal.clone() ) );
 
           var voxel = new THREE.Mesh( cube, new THREE.MeshColorFillMaterial( colors[ color ] ) );
-          voxel.position.x = Math.floor( position.x / 50 ) * 50 + 25;
-          voxel.position.y = Math.floor( position.y / 50 ) * 50 + 25;
-          voxel.position.z = Math.floor( position.z / 50 ) * 50 + 25;
+          voxel.position.x = Math.floor( position.x / DIMENSIONS.unit ) * DIMENSIONS.unit + DIMENSIONS.halfUnit;
+          voxel.position.y = Math.floor( position.y / DIMENSIONS.unit ) * DIMENSIONS.unit + DIMENSIONS.halfUnit;
+          voxel.position.z = Math.floor( position.z / DIMENSIONS.unit ) * DIMENSIONS.unit + DIMENSIONS.halfUnit;
           voxel.overdraw = true;
           scene.addObject( voxel );
 
@@ -287,9 +309,9 @@ window.scope = window.scope || {};
         if ( code.charAt( 0 ) == "1" ) {
 
           var voxel = new THREE.Mesh( cube, new THREE.MeshColorFillMaterial( colors[ current.c ] ) );
-          voxel.position.x = current.x * 50 + 25;
-          voxel.position.y = current.y * 50 + 25;
-          voxel.position.z = current.z * 50 + 25;
+          voxel.position.x = current.x * DIMENSIONS.unit + DIMENSIONS.halfUnit;
+          voxel.position.y = current.y * DIMENSIONS.unit + DIMENSIONS.halfUnit;
+          voxel.position.z = current.z * DIMENSIONS.unit + DIMENSIONS.halfUnit;
           voxel.overdraw = true;
           scene.addObject( voxel );
 
@@ -303,9 +325,9 @@ window.scope = window.scope || {};
       for ( var i = 0; i < data.length; i += 4 ) {
 
         var voxel = new THREE.Mesh( cube, new THREE.MeshColorFillMaterial( colors[ data[ i + 3 ] ] ) );
-        voxel.position.x = ( data[ i ] - 20 ) * 25;
-        voxel.position.y = ( data[ i + 1 ] + 1 ) * 25;
-        voxel.position.z = ( data[ i + 2 ] - 20 ) * 25;
+        voxel.position.x = ( data[ i ] - 20 ) * DIMENSIONS.halfUnit;
+        voxel.position.y = ( data[ i + 1 ] + 1 ) * DIMENSIONS.halfUnit;
+        voxel.position.z = ( data[ i + 2 ] - 20 ) * DIMENSIONS.halfUnit;
         voxel.overdraw = true;
         scene.addObject( voxel );
 
@@ -330,9 +352,9 @@ window.scope = window.scope || {};
 
       if ( object instanceof THREE.Mesh && object !== plane && object !== brush ) {
 
-        current.x = ( object.position.x - 25 ) / 50;
-        current.y = ( object.position.y - 25 ) / 50;
-        current.z = ( object.position.z - 25 ) / 50;
+        current.x = ( object.position.x - DIMENSIONS.halfUnit ) / DIMENSIONS.unit;
+        current.y = ( object.position.y - DIMENSIONS.halfUnit ) / DIMENSIONS.unit;
+        current.z = ( object.position.z - DIMENSIONS.halfUnit ) / DIMENSIONS.unit;
         current.c = colors.indexOf( object.material[ 0 ].color.hex & 0xffffff );
 
         code = 0;
@@ -386,7 +408,7 @@ window.scope = window.scope || {};
 
   function offsetScene( x, z ) {
 
-    var offset = new THREE.Vector3( x, 0, z ).multiplyScalar( 50 );
+    var offset = new THREE.Vector3( x, 0, z ).multiplyScalar( DIMENSIONS.unit );
 
     for ( var i in scene.objects ) {
 
@@ -440,9 +462,9 @@ window.scope = window.scope || {};
 
           position = new THREE.Vector3().add( intersect.point, intersect.object.matrixRotation.transform( intersect.face.normal.clone() ) );
 
-          brush.position.x = Math.floor( position.x / 50 ) * 50 + 25;
-          brush.position.y = Math.floor( position.y / 50 ) * 50 + 25;
-          brush.position.z = Math.floor( position.z / 50 ) * 50 + 25;
+          brush.position.x = Math.floor( position.x / DIMENSIONS.unit ) * DIMENSIONS.unit + DIMENSIONS.halfUnit;
+          brush.position.y = Math.floor( position.y / DIMENSIONS.unit ) * DIMENSIONS.unit + DIMENSIONS.halfUnit;
+          brush.position.z = Math.floor( position.z / DIMENSIONS.unit ) * DIMENSIONS.unit + DIMENSIONS.halfUnit;
 
           return;
 

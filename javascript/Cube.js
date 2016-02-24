@@ -2,14 +2,14 @@
  * @author mr.doob / http://mrdoob.com/
  */
 
-var Cube = function (width, height, depth) {
+var Cube = function (units) {
 
 	THREE.Geometry.call(this);
 
 	var scope = this,
-	width_half = width / 2,
-	height_half = height / 2,
-	depth_half = depth / 2;
+	width_half = units / 2,
+	height_half = units / 2,
+	depth_half = units / 2;
 
 	v(  width_half,  height_half, -depth_half );
 	v(  width_half, -height_half, -depth_half );
