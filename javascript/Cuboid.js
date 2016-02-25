@@ -11,14 +11,14 @@ var Cuboid = function (width, height, depth) {
   height_half = height / 2,
   depth_half = depth / 2;
 
-  v(  width_half,  height_half, -depth_half );
-  v(  width_half, -height_half, -depth_half );
-  v( -width_half, -height_half, -depth_half );
-  v( -width_half,  height_half, -depth_half );
-  v(  width_half,  height_half,  depth_half );
-  v(  width_half, -height_half,  depth_half );
-  v( -width_half, -height_half,  depth_half );
-  v( -width_half,  height_half,  depth_half );
+  v(  width * .75,  height_half, -depth_half );
+  v(  width * .75, -height_half, -depth_half );
+  v( -width * .25, -height_half, -depth_half );
+  v( -width * .25,  height_half, -depth_half );
+  v(  width * .75,  height_half,  depth_half );
+  v(  width * .75, -height_half,  depth_half );
+  v( -width * .25, -height_half,  depth_half );
+  v( -width * .25,  height_half,  depth_half );
 
   f4( 0, 1, 2, 3 );
   f4( 4, 7, 6, 5 );
