@@ -2,23 +2,43 @@
  * @author mr.doob / http://mrdoob.com/
  */
 
-var Cuboid = function (width, height, depth) {
+var Cuboid = function (units, width, height, depth) {
 
   THREE.Geometry.call(this);
 
   var scope = this,
-  width_half = width / 2,
-  height_half = height / 2,
-  depth_half = depth / 2;
+  width_max = (width * units) - (units * .5),
+  width_min = -units * .5,
 
-  v(  width * .75,  height_half, -depth_half );
-  v(  width * .75, -height_half, -depth_half );
-  v( -width * .25, -height_half, -depth_half );
-  v( -width * .25,  height_half, -depth_half );
-  v(  width * .75,  height_half,  depth_half );
-  v(  width * .75, -height_half,  depth_half );
-  v( -width * .25, -height_half,  depth_half );
-  v( -width * .25,  height_half,  depth_half );
+  height_max = (height * units) - (units * .5),
+  height_min = -units * .5,
+
+  depth_max = (depth * units) - (units * .5),
+  depth_min = -units * .5;
+
+  v( width_max, height_max, depth_min );
+  v( width_max, height_min, depth_min );
+  v( width_min, height_min, depth_min );
+  v( width_min, height_max, depth_min );
+  v( width_max, height_max, depth_max );
+  v( width_max, height_min, depth_max );
+  v( width_min, height_min, depth_max );
+  v( width_min, height_max, depth_max );
+
+  /*
+  height_half = height / 2 * units,
+  depth_half = depth / 2 * units;
+
+  v( width_max,  height_half, -depth_half );
+  v( width_max, -height_half, -depth_half );
+  v( width_min, -height_half, -depth_half );
+  v( width_min,  height_half, -depth_half );
+  v( width_max,  height_half,  depth_half );
+  v( width_max, -height_half,  depth_half );
+  v( width_min, -height_half,  depth_half );
+  v( width_min,  height_half,  depth_half );
+  */
+
 
   f4( 0, 1, 2, 3 );
   f4( 4, 7, 6, 5 );

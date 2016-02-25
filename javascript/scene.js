@@ -58,7 +58,7 @@ window.scope = window.scope || {};
     plane.rotation.x = - 90 * Math.PI / 180;
     scene.addObject( plane );
 
-    setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit );
+    setShape( 1, 1, 1 );
 
     ray = new THREE.Ray( camera.position, null );
 
@@ -111,9 +111,9 @@ window.scope = window.scope || {};
   }
 
   function setShape(width, height, depth) {
-    if( (width + height + depth) / 3 > DIMENSIONS.unit ) {
-      cube = new Cuboid( width, height, depth );
-      if(brush) brush.geometry = new Cuboid( width, height, depth );
+    if( (width + height + depth) / 3 > 1 ) {
+      cube = new Cuboid( DIMENSIONS.unit, width, height, depth );
+      if(brush) brush.geometry = new Cuboid( DIMENSIONS.unit, width, height, depth );
     } else {
       cube = new Cube( DIMENSIONS.unit );
       if(brush) brush.geometry = new Cube( DIMENSIONS.unit );
@@ -525,13 +525,13 @@ window.scope = window.scope || {};
   function setPiece(code) {
     switch(code) {
       // 1x1x1
-      case 1: setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+      case 1: setShape( 1, 1, 1 ); break;
       // 2x1x1
-      case 2: setShape( DIMENSIONS.unit * 2, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+      case 2: setShape( 2, 1, 1 ); break;
       // 1x2x1
-      case 3: setShape( DIMENSIONS.unit, DIMENSIONS.unit * 2, DIMENSIONS.unit ); break;
+      case 3: setShape( 1, 2, 1 ); break;
       // 1x1x2
-      case 4: setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit * 2 ); break;
+      case 4: setShape( 1, 1, 2 ); break;
 
 
     }
