@@ -15,10 +15,35 @@
         margin: 0px;
         overflow: hidden;
       }
+      .info {
+        color: #444;
+        background-color: #fff;
+        border-bottom: 1px solid #ddd;
+        padding: 8px 10px;
+        text-transform: uppercase;
+
+        position: absolute;
+        top: 5px;
+        width: 100%;
+        text-align: center;
+      }
   </style>
 </head>
 
 <body>
+
+ <div class="info">
+  <div>
+    <strong>0 - 9</strong>: colors, <strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel, <strong>drag</strong>: rotate | <a id="link" href="" target="_blank">share</a> <a href="javascript:scope.save();">save</a> <a href="javascript:scope.clear();">clear</a>
+  </div>
+  <div class="shape-control">
+    <a href="javascript:scope.setPiece(1);">1x1x1</a>
+    <a href="javascript:scope.setPiece(2);">2x1x1</a>
+  </div>
+ </div>
+
+
+
 
   <script type="text/javascript" src="javascript/ThreeCanvas.js"></script>
   <script type="text/javascript" src="javascript/Cube.js"></script>

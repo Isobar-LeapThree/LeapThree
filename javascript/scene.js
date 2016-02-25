@@ -22,14 +22,6 @@ window.scope = window.scope || {};
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
-    var info = document.createElement( 'div' );
-    info.style.position = 'absolute';
-    info.style.top = '5px';
-    info.style.width = '100%';
-    info.style.textAlign = 'center';
-    info.innerHTML = '<span style="color: #444; background-color: #fff; border-bottom: 1px solid #ddd; padding: 8px 10px; text-transform: uppercase;"><strong>0 - 9</strong>: colors, <strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel, <strong>drag</strong>: rotate | <a id="link" href="" target="_blank">share</a> <a href="javascript:scope.save();">save</a> <a href="javascript:scope.clear();">clear</a></span>';
-    container.appendChild( info );
-
     camera = new THREE.Camera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
     camera.position.x = radious * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
     camera.position.y = radious * Math.sin( phi * Math.PI / 360 );
@@ -120,11 +112,12 @@ window.scope = window.scope || {};
 
   function setShape(width, height, depth) {
     if( (width + height + depth) / 3 > DIMENSIONS.unit ) {
+      if(brush) brush.geometry = new Cuboid( width, height, depth );
       return new Cuboid( width, height, depth );
     } else {
+      if(brush) brush.geometry = new Cube( DIMENSIONS.unit );
       return new Cube( DIMENSIONS.unit );
     }
-
   }
 
   function onDocumentKeyDown( event ) {
@@ -154,8 +147,8 @@ window.scope = window.scope || {};
       case 40: offsetScene( 0, 1 ); break;
 
       // - +
-      case 189: cube = setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit ); break;
-      case 187: cube = setShape( DIMENSIONS.unit * 2, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+      //case 189: cube = setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+      //case 187: cube = setShape( DIMENSIONS.unit * 2, DIMENSIONS.unit, DIMENSIONS.unit ); break;
 
     }
 
@@ -484,6 +477,8 @@ window.scope = window.scope || {};
 
   }
 
+  // USER CONTROLS
+
   function save() {
 
     linesMaterial.color.setRGBA( 0, 0, 0, 0 );
@@ -527,6 +522,13 @@ window.scope = window.scope || {};
 
   }
 
+  function setPiece(code) {
+    switch(code) {
+      case 1: cube = setShape( DIMENSIONS.unit, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+      case 2: cube = setShape( DIMENSIONS.unit * 2, DIMENSIONS.unit, DIMENSIONS.unit ); break;
+    }
+  }
+
   // https://gist.github.com/665235
 
   function decode( string ) {
@@ -547,5 +549,6 @@ window.scope = window.scope || {};
 
   scope.save = save;
   scope.clear = clear;
+  scope.setPiece = setPiece;
 
 })(window.scope)
