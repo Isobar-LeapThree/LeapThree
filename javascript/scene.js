@@ -532,8 +532,8 @@ window.scope = window.scope || {};
       case 3: setShape( 1, 2, 1 ); break;
       // 1x1x2
       case 4: setShape( 1, 1, 2 ); break;
-
-
+      // 2x1x1
+      case 5: setShape( 2, .25, 1 ); break;
     }
   }
 
