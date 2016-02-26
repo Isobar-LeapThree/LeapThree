@@ -26,6 +26,7 @@ window.scope = window.scope || {};
 
   init();
   render();
+  scope.initLeap(scene, camera);
 
   function init() {
 

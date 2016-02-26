@@ -1,45 +1,52 @@
 window.scope = window.scope || {};
 (function(scope) {
-  var controller;
+  var riggedHandPlugin;
 
-  window.controller = controller = new Leap.Controller({
-    background: true
-  });
 
-  controller
-  .use('handHold', {})
-  .use('handEntry', {})
-  .use('riggedHand', {
-    parent: scope.scene,
-    camera: scope.camera,
-    scale: 0.5,
-    offset: new THREE.Vector3(0,500,-500),
-    positionScale: 2
-  });
 
-  controller.connect();
+  scope.initLeap = function(scene, camera) {
+    Leap.loop({
+      hand: function(hand){
 
-  controller.on('frame', function(frame) {
-    var hand, handMesh, offsetDown, offsetForward, pos;
-    if (!frame.hands[0]) {
-      return;
+        var handMesh = hand.data('riggedHand.mesh');
+
+        var screenPosition = handMesh.screenPosition(
+          hand.palmPosition,
+          riggedHandPlugin.camera
+        );
+
+      }
+    })
+    .use('riggedHand', {
+      parent: scene,
+      camera: camera,
+      scale: .25,
+      renderFn: function() {}
+    })
+    .use('handEntry')
+    .on('handLost', function(hand){})
+    .on('frame', function(frame){
+
+    });
+
+    riggedHandPlugin = Leap.loopController.plugins.riggedHand;
+  };
+
+  /*
+  controller.use('riggedHand', {
+    parent: window.scene,
+    camera: window.camera,
+    scale: 1,
+    positionScale: 1,
+    offset: new THREE.Vector3(0, -2, 0),
+    renderFn: function() {},
+    boneColors: function(boneMesh, leapHand) {
+      return {
+        hue: 0.6,
+        saturation: 0.2,
+        lightness: 0.8
+      };
     }
-    hand = frame.hands[0];
-    handMesh = hand.data('riggedHand.mesh');
-
-    pos = Leap.vec3.clone(hand.palmPosition);
-    //offsetDown = Leap.vec3.clone(hand.palmNormal);
-    //Leap.vec3.multiply(offsetDown, offsetDown, [30, 30, 30]);
-    //Leap.vec3.add(pos, pos, offsetDown);
-    //offsetForward = Leap.vec3.clone(hand.direction);
-    //Leap.vec3.multiply(offsetForward, offsetForward, [30, 30, 30]);
-    //Leap.vec3.add(pos, pos, offsetForward);
-
-    handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
-
-    if (hand.pinchStrength > 0.5) {
-      scope.pinch = true;
-    }
-  });
+  });*/
 
 })(window.scope);
