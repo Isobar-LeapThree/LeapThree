@@ -26,6 +26,8 @@
         width: 100%;
         text-align: center;
       }
+
+      .output { padding: 3px; background: #000; color: #fff; }
     </style>
   </head>
   <body>
@@ -35,7 +37,7 @@
       <strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel, <a href="javascript:scope.save()">save .png</a>';
      </div>
      <div class="data-log">
-      <strong>leap position:</strong><div id="leapoutput"></div>
+      <strong>leap position:</strong><span id="leapoutput" class="output"></span>
      </div>
     </div>
 

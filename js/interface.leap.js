@@ -6,9 +6,15 @@ window.scope = window.scope || {};
     background: true
   });
 
-  controller.use('riggedHand', {
+  controller
+  .use('handHold', {})
+  .use('handEntry', {})
+  .use('riggedHand', {
     parent: scope.scene,
-    camera: scope.camera
+    camera: scope.camera,
+    scale: 0.5,
+    offset: new THREE.Vector3(0,500,-500),
+    positionScale: 2
   });
 
   controller.connect();
@@ -22,12 +28,12 @@ window.scope = window.scope || {};
     handMesh = hand.data('riggedHand.mesh');
 
     pos = Leap.vec3.clone(hand.palmPosition);
-    offsetDown = Leap.vec3.clone(hand.palmNormal);
-    Leap.vec3.multiply(offsetDown, offsetDown, [30, 30, 30]);
-    Leap.vec3.add(pos, pos, offsetDown);
-    offsetForward = Leap.vec3.clone(hand.direction);
-    Leap.vec3.multiply(offsetForward, offsetForward, [30, 30, 30]);
-    Leap.vec3.add(pos, pos, offsetForward);
+    //offsetDown = Leap.vec3.clone(hand.palmNormal);
+    //Leap.vec3.multiply(offsetDown, offsetDown, [30, 30, 30]);
+    //Leap.vec3.add(pos, pos, offsetDown);
+    //offsetForward = Leap.vec3.clone(hand.direction);
+    //Leap.vec3.multiply(offsetForward, offsetForward, [30, 30, 30]);
+    //Leap.vec3.add(pos, pos, offsetForward);
 
     handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
 

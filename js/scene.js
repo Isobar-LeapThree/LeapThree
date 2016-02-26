@@ -9,7 +9,7 @@ window.scope = window.scope || {};
   radious = 1600, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60;
 
 
-  var rollOverMesh, rollOverMaterial;
+  var rollOverMesh, rollOverMaterial, leapMesh, leapMaterial;
 
   var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
   var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0x00ff80, overdraw: 0.5 } );
@@ -17,6 +17,12 @@ window.scope = window.scope || {};
   scope.leapPosition = new THREE.Vector3(0,0,0);
 
   var objects = [];
+  var COLORS = {
+    yellow: 0xffea00,
+    green: 0x03c20c,
+    blue: 0x0018ff,
+    red: 0xff0000
+  };
 
   init();
   render();
@@ -34,12 +40,19 @@ window.scope = window.scope || {};
 
     scene = new THREE.Scene();
 
+    var axes = new THREE.AxisHelper(200);
+    scene.add(axes);
+
     // roll-over helpers
 
     rollOverGeo = new THREE.BoxGeometry( 50, 50, 50 );
-    rollOverMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: true } );
+    rollOverMaterial = new THREE.MeshBasicMaterial( { color: COLORS.red, opacity: 0.5, transparent: true } );
     rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
     scene.add( rollOverMesh );
+
+    leapMaterial = new THREE.MeshBasicMaterial( { color: COLORS.blue, opacity: 0.5, transparent: true } );
+    leapMesh = new THREE.Mesh( rollOverGeo, leapMaterial );
+    scene.add( leapMesh );
 
     // Scene movement
 
@@ -162,6 +175,9 @@ window.scope = window.scope || {};
       rollOverMesh.position.copy( intersect.point ).add( intersect.face.normal );
       rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 
+      //leapMesh.position.x = scope.leapPosition.x;
+      //leapMesh.position.z = scope.leapPosition.z;
+
     }
 
     render();
@@ -255,11 +271,11 @@ window.scope = window.scope || {};
 
   function render() {
 
-    var leapOut = document.getElementById('leapoutput');
-    console.log("hand-->", scope.leapPosition);
+    var leapText = "x: " + Math.floor(scope.leapPosition.x) + ", y: " + Math.floor(scope.leapPosition.y) + ", z: " + Math.floor(scope.leapPosition.z);
+    document.getElementById('leapoutput').innerHTML = leapText;
 
     renderer.render( scene, camera );
-
+    requestAnimationFrame(render);
   }
 
   scope.scene = scene;
