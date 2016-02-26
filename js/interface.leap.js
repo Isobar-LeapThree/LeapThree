@@ -38,7 +38,6 @@ window.scope = window.scope || {};
 
     controller.use('handHold').use('transform', {
       position: new THREE.Vector3(0, 0, 0),
-      scale: .5
     }).use('handEntry').use('screenPosition').use('riggedHand', {
       parent: scene,
       renderer: renderer,
@@ -50,11 +49,7 @@ window.scope = window.scope || {};
         renderer.render(scene, camera);
         return;
       },
-      materialOptions: {
-        wireframe: ''
-      },
-      dotsMode: '',
-      stats: '',
+
       camera: camera,
       boneLabels: function(boneMesh, leapHand) {
         if (boneMesh.name.indexOf('Finger_03') === 0) {
