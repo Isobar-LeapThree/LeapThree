@@ -6,6 +6,8 @@ window.scope = window.scope || {};
 
   var mouse, raycaster, isShiftDown = false;
 
+  var rollOverMesh, rollOverMaterial;
+
   var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
   var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0x00ff80, overdraw: 0.5 } );
 
@@ -32,6 +34,13 @@ window.scope = window.scope || {};
     camera.lookAt( new THREE.Vector3() );
 
     scene = new THREE.Scene();
+
+    // roll-over helpers
+
+    rollOverGeo = new THREE.BoxGeometry( 50, 50, 50 );
+    rollOverMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: true } );
+    rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
+    scene.add( rollOverMesh );
 
     // Grid
 
@@ -94,6 +103,8 @@ window.scope = window.scope || {};
     renderer.setSize( window.innerWidth, window.innerHeight );
     container.appendChild(renderer.domElement);
 
+
+    document.addEventListener( 'mousemove', onDocumentMouseMove, false );
     document.addEventListener( 'mousedown', onDocumentMouseDown, false );
     document.addEventListener( 'keydown', onDocumentKeyDown, false );
     document.addEventListener( 'keyup', onDocumentKeyUp, false );
@@ -112,6 +123,29 @@ window.scope = window.scope || {};
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     render();
+
+  }
+
+  function onDocumentMouseMove( event ) {
+
+  event.preventDefault();
+
+  mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
+
+  raycaster.setFromCamera( mouse, camera );
+
+  var intersects = raycaster.intersectObjects( objects );
+
+  if ( intersects.length > 0 ) {
+
+    var intersect = intersects[ 0 ];
+
+    rollOverMesh.position.copy( intersect.point ).add( intersect.face.normal );
+    rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+
+  }
+
+  render();
 
   }
 
