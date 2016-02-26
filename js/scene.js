@@ -4,12 +4,17 @@ window.scope = window.scope || {};
   var camera, scene, renderer;
   var plane;
 
-  var mouse, raycaster, isShiftDown = false;
+  var mouse, raycaster, isShiftDown, rotationControls = false;
+  var mouse3D, isMouseDown = false, onMouseDownPosition,
+  radious = 1600, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60;
+
 
   var rollOverMesh, rollOverMaterial;
 
   var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
   var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0x00ff80, overdraw: 0.5 } );
+
+  scope.leapPosition = new THREE.Vector3(0,0,0);
 
   var objects = [];
 
@@ -21,16 +26,10 @@ window.scope = window.scope || {};
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
-    var info = document.createElement( 'div' );
-    info.style.position = 'absolute';
-    info.style.top = '10px';
-    info.style.width = '100%';
-    info.style.textAlign = 'center';
-    info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> - voxel painter<br><strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel, <a href="javascript:save()">save .png</a>';
-    container.appendChild( info );
-
     camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.set( 500, 800, 1300 );
+    camera.position.x = radious * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
+    camera.position.y = radious * Math.sin( phi * Math.PI / 360 );
+    camera.position.z = radious * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
     camera.lookAt( new THREE.Vector3() );
 
     scene = new THREE.Scene();
@@ -41,6 +40,10 @@ window.scope = window.scope || {};
     rollOverMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: true } );
     rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
     scene.add( rollOverMesh );
+
+    // Scene movement
+
+    onMouseDownPosition = new THREE.Vector2();
 
     // Grid
 
@@ -106,8 +109,10 @@ window.scope = window.scope || {};
 
     document.addEventListener( 'mousemove', onDocumentMouseMove, false );
     document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+    document.addEventListener( 'mouseup', onDocumentMouseUp, false );
     document.addEventListener( 'keydown', onDocumentKeyDown, false );
     document.addEventListener( 'keyup', onDocumentKeyUp, false );
+    //document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
 
     //
 
@@ -128,30 +133,51 @@ window.scope = window.scope || {};
 
   function onDocumentMouseMove( event ) {
 
-  event.preventDefault();
+    event.preventDefault();
 
-  mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
+    mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
 
-  raycaster.setFromCamera( mouse, camera );
+    raycaster.setFromCamera( mouse, camera );
 
-  var intersects = raycaster.intersectObjects( objects );
+    if( isMouseDown && rotationControls ) {
 
-  if ( intersects.length > 0 ) {
+      theta = - ( ( event.clientX - onMouseDownPosition.x ) * 0.5 ) + onMouseDownTheta;
+      phi = ( ( event.clientY - onMouseDownPosition.y ) * 0.5 ) + onMouseDownPhi;
 
-    var intersect = intersects[ 0 ];
+      phi = Math.min( 180, Math.max( 0, phi ) );
 
-    rollOverMesh.position.copy( intersect.point ).add( intersect.face.normal );
-    rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+      camera.position.x = radious * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
+      camera.position.y = radious * Math.sin( phi * Math.PI / 360 );
+      camera.position.z = radious * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
+      camera.updateMatrix();
+      //camera.lookAt(0,0,0);
+    }
 
-  }
+    var intersects = raycaster.intersectObjects( objects );
 
-  render();
+    if ( intersects.length > 0 ) {
+
+      var intersect = intersects[ 0 ];
+
+      rollOverMesh.position.copy( intersect.point ).add( intersect.face.normal );
+      rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+
+    }
+
+    render();
 
   }
 
   function onDocumentMouseDown( event ) {
 
     event.preventDefault();
+
+    isMouseDown = true;
+
+    onMouseDownTheta = theta;
+    onMouseDownPhi = phi;
+    onMouseDownPosition.x = event.clientX;
+    onMouseDownPosition.y = event.clientY;
 
     mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
@@ -191,6 +217,16 @@ window.scope = window.scope || {};
 
   }
 
+  function onDocumentMouseUp( event ) {
+
+    event.preventDefault();
+
+    isMouseDown = false;
+
+    onMouseDownPosition.x = event.clientX - onMouseDownPosition.x;
+    onMouseDownPosition.y = event.clientY - onMouseDownPosition.y;
+  }
+
   function onDocumentKeyDown( event ) {
 
     switch( event.keyCode ) {
@@ -219,11 +255,15 @@ window.scope = window.scope || {};
 
   function render() {
 
+    var leapOut = document.getElementById('leapoutput');
+    console.log("hand-->", scope.leapPosition);
+
     renderer.render( scene, camera );
 
   }
 
   scope.scene = scene;
   scope.camera = camera;
+  scope.save = save;
 
 })(window.scope);
