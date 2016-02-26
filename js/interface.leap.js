@@ -5,6 +5,7 @@ window.scope = window.scope || {};
 
 
   scope.initLeap = function(scene, camera, renderer) {
+    /*
     Leap.loop({
       hand: function(hand){
 
@@ -16,23 +17,60 @@ window.scope = window.scope || {};
         );
 
       }
+    }).use('handHold').use('transform', {
+      position: new THREE.Vector3(0, 0, 0),
+      scale: 2
     })
     .use('riggedHand', {
       parent: scene,
       camera: camera,
-      scale: .25,
+      scale: 1,
       renderer: renderer,
       renderFn: function() {
         renderer.render(scene, camera);
       }
-    })
-    .use('handEntry')
-    .on('handLost', function(hand){})
-    .on('frame', function(frame){
-
-    });
+    }).connect();
 
     riggedHandPlugin = Leap.loopController.plugins.riggedHand;
+    */
+    window.controller = controller = new Leap.Controller;
+    //window.controls = new THREE.TrackballControls(camera);
+
+    controller.use('handHold').use('transform', {
+      position: new THREE.Vector3(0, 0, 0),
+      scale: .5
+    }).use('handEntry').use('screenPosition').use('riggedHand', {
+      parent: scene,
+      renderer: renderer,
+      scale: 1,
+      positionScale: 1,
+      helper: true,
+      offset: new THREE.Vector3(0, 0, 0),
+      renderFn: function() {
+        renderer.render(scene, camera);
+        return;
+      },
+      materialOptions: {
+        wireframe: ''
+      },
+      dotsMode: '',
+      stats: '',
+      camera: camera,
+      boneLabels: function(boneMesh, leapHand) {
+        if (boneMesh.name.indexOf('Finger_03') === 0) {
+          return leapHand.pinchStrength;
+        }
+      },
+      boneColors: function(boneMesh, leapHand) {
+        if ((boneMesh.name.indexOf('Finger_0') === 0) || (boneMesh.name.indexOf('Finger_1') === 0)) {
+          return {
+            hue: 0.6,
+            saturation: leapHand.pinchStrength
+          };
+        }
+      },
+      checkWebGL: true
+    }).connect();
   };
 
   /*
