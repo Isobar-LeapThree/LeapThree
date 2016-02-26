@@ -26,7 +26,7 @@ window.scope = window.scope || {};
 
   init();
   render();
-  scope.initLeap(scene, camera);
+  scope.initLeap(scene, camera, renderer);
 
   function init() {
 
@@ -276,7 +276,7 @@ window.scope = window.scope || {};
     document.getElementById('leapoutput').innerHTML = leapText;
 
     renderer.render( scene, camera );
-    requestAnimationFrame(render);
+    //requestAnimationFrame(render);
   }
 
   scope.scene = scene;

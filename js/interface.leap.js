@@ -4,7 +4,7 @@ window.scope = window.scope || {};
 
 
 
-  scope.initLeap = function(scene, camera) {
+  scope.initLeap = function(scene, camera, renderer) {
     Leap.loop({
       hand: function(hand){
 
@@ -21,7 +21,10 @@ window.scope = window.scope || {};
       parent: scene,
       camera: camera,
       scale: .25,
-      renderFn: function() {}
+      renderer: renderer,
+      renderFn: function() {
+        renderer.render(scene, camera);
+      }
     })
     .use('handEntry')
     .on('handLost', function(hand){})
