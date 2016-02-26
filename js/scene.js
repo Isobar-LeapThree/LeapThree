@@ -188,4 +188,8 @@ window.scope = window.scope || {};
     renderer.render( scene, camera );
 
   }
+
+  scope.scene = scene;
+  scope.camera = camera;
+
 })(window.scope);
