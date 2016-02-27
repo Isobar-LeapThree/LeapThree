@@ -179,6 +179,7 @@ window.scope = window.scope || {};
       //leapMesh.position.x = scope.leapPosition.x;
       //leapMesh.position.z = scope.leapPosition.z;
 
+
     }
 
     render();
@@ -278,6 +279,27 @@ window.scope = window.scope || {};
   }
 
   function renderFromLeap() {
+
+    //leapMesh.position.copy( scope.leapPosition );
+    //leapMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+
+    raycaster.setFromCamera( mouse, camera );
+    var intersects = raycaster.intersectObjects( objects );
+
+    if ( intersects.length > 0 ) {
+
+      var intersect = intersects[ 0 ];
+
+      scope.leapPosition.y = 0;
+      leapMesh.position.copy( scope.leapPosition ).add( intersect.face.normal );
+      leapMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+
+      //leapMesh.position.x = scope.leapPosition.x;
+      //leapMesh.position.z = scope.leapPosition.z;
+
+
+    }
+
     output('leapoutput', vectorToText(scope.leapPosition));
   }
 
