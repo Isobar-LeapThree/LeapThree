@@ -20,7 +20,7 @@ window.scope = window.scope || {};
 
   var brushColor = colors.GREEN;
   var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
-  var cubeMaterial = new THREE.MeshLambertMaterial( { color: brushColor } );
+  var cubeMaterial = new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } );
 
   scope.leapPosition = new THREE.Vector3(0,0,0);
 
@@ -224,7 +224,7 @@ window.scope = window.scope || {};
 
       } else {
 
-        var voxel = new THREE.Mesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: .5} ); );
+        var voxel = new THREE.Mesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ) );
         voxel.position.copy( intersect.point ).add( intersect.face.normal );
         voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
         scene.add( voxel );
@@ -289,7 +289,7 @@ window.scope = window.scope || {};
 
   function setBrushColor( hex ) {
 
-    cubeMaterial.color.setHex( hex );
+    brushColor = hex;
     render();
   }
 
