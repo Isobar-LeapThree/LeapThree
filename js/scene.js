@@ -6,7 +6,7 @@ window.scope = window.scope || {};
 
   var mouse, raycaster, isShiftDown, rotationControls = false;
   var mouse3D, isMouseDown = false, onMouseDownPosition,
-  radious = 1600, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60;
+  radious = 900, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60;
 
 
   var rollOverMesh, rollOverMaterial, leapMesh, leapMaterial;
@@ -114,7 +114,7 @@ window.scope = window.scope || {};
     directionalLight.position.normalize();
     scene.add( directionalLight );
 
-    renderer = new THREE.CanvasRenderer();
+    renderer = new THREE.WebGLRenderer();
     renderer.setClearColor( 0xf0f0f0 );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
