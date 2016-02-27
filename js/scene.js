@@ -11,18 +11,21 @@ window.scope = window.scope || {};
 
   var rollOverMesh, rollOverMaterial, leapMesh, leapMaterial;
 
+  var colors = {
+    YELLOW: 0xffea00,
+    GREEN: 0x03c20c,
+    BLUE: 0x0018ff,
+    RED: 0xff0000
+  };
+
+  var brushColor = colors.GREEN;
   var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
-  var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0x00ff80, overdraw: 0.5 } );
+  var cubeMaterial = new THREE.MeshLambertMaterial( { color: brushColor } );
 
   scope.leapPosition = new THREE.Vector3(0,0,0);
 
   var objects = [];
-  var COLORS = {
-    yellow: 0xffea00,
-    green: 0x03c20c,
-    blue: 0x0018ff,
-    red: 0xff0000
-  };
+
 
   init();
   render();
@@ -47,11 +50,11 @@ window.scope = window.scope || {};
     // roll-over helpers
 
     rollOverGeo = new THREE.BoxGeometry( 50, 50, 50 );
-    rollOverMaterial = new THREE.MeshBasicMaterial( { color: COLORS.red, opacity: 0.5, transparent: true } );
+    rollOverMaterial = new THREE.MeshBasicMaterial( { color: colors.RED, opacity: 0.5, transparent: true } );
     rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
     scene.add( rollOverMesh );
 
-    leapMaterial = new THREE.MeshBasicMaterial( { color: COLORS.blue, opacity: 0.5, transparent: true } );
+    leapMaterial = new THREE.MeshBasicMaterial( { color: colors.BLUE, opacity: 0.5, transparent: true } );
     leapMesh = new THREE.Mesh( rollOverGeo, leapMaterial );
     scene.add( leapMesh );
 
@@ -220,7 +223,7 @@ window.scope = window.scope || {};
 
       } else {
 
-        var voxel = new THREE.Mesh( cubeGeometry, cubeMaterial );
+        var voxel = new THREE.Mesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: .5} ); );
         voxel.position.copy( intersect.point ).add( intersect.face.normal );
         voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
         scene.add( voxel );
@@ -251,6 +254,11 @@ window.scope = window.scope || {};
 
     switch( event.keyCode ) {
 
+      case 49: setBrushColor( colors.RED ); break;
+      case 50: setBrushColor( colors.YELLOW ); break;
+      case 51: setBrushColor( colors.BLUE ); break;
+      case 52: setBrushColor( colors.GREEN ); break;
+
       case 16: isShiftDown = true; break;
 
     }
@@ -276,6 +284,12 @@ window.scope = window.scope || {};
   function render() {
     renderer.render( scene, camera );
     //requestAnimationFrame(render);
+  }
+
+  function setBrushColor( hex ) {
+
+    cubeMaterial.color.setHex( hex );
+    render();
   }
 
   function renderFromLeap() {
