@@ -27,6 +27,16 @@
         text-align: center;
       }
 
+      #data-log {
+        padding: 5px; border: 1px solid #000;
+        background: #ccc;
+        width: 250px;
+        position: absolute; top: 10px left: 10px;
+      }
+
+      #data-log dl { margin: 0; padding: 0; }
+      #data-log dd { list-style:none; margin: 5px 0; }
+
       .output { padding: 3px; background: #000; color: #fff; }
     </style>
   </head>
@@ -36,10 +46,16 @@
      <div class="controls">
       <strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel, <a href="javascript:scope.save()">save .png</a>';
      </div>
-     <div class="data-log">
-      <strong>leap position:</strong><span id="leapoutput" class="output"></span>
-     </div>
     </div>
+
+    <div id="data-log">
+      <dl>
+        <dt>leap position</dt>
+        <dd id="leapoutput" class="output"></dd>
+        <dt>box placed</dt>
+        <dd id="boxout" class="output"></dd>
+      </dl>
+   </div>
 
 
 

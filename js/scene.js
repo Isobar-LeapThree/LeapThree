@@ -224,6 +224,8 @@ window.scope = window.scope || {};
         voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
         scene.add( voxel );
 
+        output('boxout', vectorToText(voxel.position));
+
         objects.push( voxel );
 
       }
@@ -271,16 +273,25 @@ window.scope = window.scope || {};
   }
 
   function render() {
-
-    var leapText = "x: " + Math.floor(scope.leapPosition.x) + ", y: " + Math.floor(scope.leapPosition.y) + ", z: " + Math.floor(scope.leapPosition.z);
-    document.getElementById('leapoutput').innerHTML = leapText;
-
     renderer.render( scene, camera );
     //requestAnimationFrame(render);
+  }
+
+  function renderFromLeap() {
+    output('leapoutput', vectorToText(scope.leapPosition));
+  }
+
+  function output(elId, text) {
+    document.getElementById(elId).innerHTML = text;
+  }
+
+  function vectorToText(vector) {
+    return "x: " + Math.floor(vector.x) + ", y: " + Math.floor(vector.y) + ", z: " + Math.floor(vector.z);
   }
 
   scope.scene = scene;
   scope.camera = camera;
   scope.save = save;
+  scope.renderFromLeap = renderFromLeap;
 
 })(window.scope);

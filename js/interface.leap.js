@@ -48,6 +48,7 @@ window.scope = window.scope || {};
       //handMesh.scenePosition(pos, scope.light1position);
       //if(scope.activeBlock)
       handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
+      scope.renderFromLeap();
     }).connect();
   };
 
