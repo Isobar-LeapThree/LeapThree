@@ -55,7 +55,7 @@ window.scope = window.scope || {};
     scene.add( rollOverMesh );
 
     var guideGeo = new THREE.BoxGeometry( 50, 50, 50 );
-    guideMaterial = new THREE.MeshBasicMaterial( { color: colors.BLU, wireframe: true } );
+    guideMaterial = new THREE.MeshBasicMaterial( { color: colors.BLUE, wireframe: true } );
     guideMesh = new THREE.Mesh( rollOverGeo, guideMaterial );
     scene.add( guideMesh );
 
