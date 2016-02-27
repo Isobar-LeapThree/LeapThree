@@ -9,7 +9,7 @@ window.scope = window.scope || {};
   radious = 900, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60;
 
 
-  var rollOverMesh, rollOverMaterial, leapMesh, leapMaterial;
+  var rollOverMesh, rollOverMaterial, guideguideMesh, guideMaterial;
 
   var colors = {
     YELLOW: 0xffea00,
@@ -49,14 +49,15 @@ window.scope = window.scope || {};
 
     // roll-over helpers
 
-    rollOverGeo = new THREE.BoxGeometry( 50, 50, 50 );
+    var rollOverGeo = new THREE.BoxGeometry( 50, 50, 50 );
     rollOverMaterial = new THREE.MeshBasicMaterial( { color: colors.RED, opacity: 0.5, transparent: true } );
     rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
     scene.add( rollOverMesh );
 
-    leapMaterial = new THREE.MeshBasicMaterial( { color: colors.BLUE, opacity: 0.5, transparent: true } );
-    leapMesh = new THREE.Mesh( rollOverGeo, leapMaterial );
-    scene.add( leapMesh );
+    var guideGeo = new THREE.BoxGeometry( 50, 50, 50 );
+    guideMaterial = new THREE.MeshBasicMaterial( { color: colors.BLU, wireframe: true } );
+    guideMesh = new THREE.Mesh( rollOverGeo, guideMaterial );
+    scene.add( guideMesh );
 
     // Scene movement
 
@@ -179,8 +180,8 @@ window.scope = window.scope || {};
       rollOverMesh.position.copy( intersect.point ).add( intersect.face.normal );
       rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 
-      //leapMesh.position.x = scope.leapPosition.x;
-      //leapMesh.position.z = scope.leapPosition.z;
+      //guideMesh.position.x = scope.leapPosition.x;
+      //guideMesh.position.z = scope.leapPosition.z;
 
 
     }
@@ -294,8 +295,8 @@ window.scope = window.scope || {};
 
   function renderFromLeap() {
 
-    //leapMesh.position.copy( scope.leapPosition );
-    //leapMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+    //guideMesh.position.copy( scope.leapPosition );
+    //guideMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 
     raycaster.setFromCamera( mouse, camera );
     var intersects = raycaster.intersectObjects( objects );
@@ -305,11 +306,11 @@ window.scope = window.scope || {};
       var intersect = intersects[ 0 ];
 
       scope.leapPosition.y = 0;
-      leapMesh.position.copy( scope.leapPosition ).add( intersect.face.normal );
-      leapMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+      guideMesh.position.copy( scope.leapPosition ).add( intersect.face.normal );
+      guideMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 
-      //leapMesh.position.x = scope.leapPosition.x;
-      //leapMesh.position.z = scope.leapPosition.z;
+      //guideMesh.position.x = scope.leapPosition.x;
+      //guideMesh.position.z = scope.leapPosition.z;
 
 
     }
