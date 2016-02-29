@@ -311,8 +311,17 @@ window.scope = window.scope || {};
 
       //guideMesh.position.x = scope.leapPosition.x;
       //guideMesh.position.z = scope.leapPosition.z;
+    }
 
+    // Leap collision
 
+    var vector = scope.leapPosition.clone().unproject( camera );
+    var direction = new THREE.Vector3( 0, 0, -1 ).transformDirection( camera.matrixWorld );
+    raycaster.set( vector, direction );
+    var l_intersects = raycaster.intersectObjects( objects );
+
+    if ( l_intersects.length > 0 ) {
+      //console.log('LEAP COLLISION');
     }
 
     output('leapoutput', vectorToText(scope.leapPosition));

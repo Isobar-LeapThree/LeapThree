@@ -6,13 +6,14 @@ window.scope = window.scope || {};
     window.controller = controller = new Leap.Controller;
     //window.controls = new THREE.TrackballControls(camera);
 
-    controller.use('handHold').use('transform', {
-      position: new THREE.Vector3(0, 0, 0),
-    }).use('handEntry').use('riggedHand', {
+    controller
+      .use('handHold')
+      .use('handEntry')
+      .use('riggedHand', {
       parent: scene,
       renderer: renderer,
       scale: 1,
-      positionScale: 1,
+      positionScale: 2,
       helper: true,
       offset: new THREE.Vector3(0, 0, 0),
       renderFn: function(thing) {
