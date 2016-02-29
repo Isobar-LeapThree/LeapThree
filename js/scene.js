@@ -59,6 +59,7 @@ window.scope = window.scope || {};
     var guideGeo = new THREE.BoxGeometry( 50, 50, 50 );
     guideMaterial = new THREE.MeshBasicMaterial( { color: colors.BLUE, wireframe: true } );
     guideMesh = new THREE.Mesh( rollOverGeo, guideMaterial );
+    guideMesh.position.set(25, 25, 25);
     scene.add( guideMesh );
 
     // Scene movement
@@ -91,13 +92,21 @@ window.scope = window.scope || {};
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
-    var geometry = new THREE.PlaneBufferGeometry( 1000, 1000 );
+    var geometry = new THREE.PlaneGeometry( 1000, 1000 );
     geometry.rotateX( - Math.PI / 2 );
 
-    plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: false } ) );
+    plane = new Physijs.PlaneMesh( geometry, new THREE.MeshBasicMaterial( { visible: false } ) );
     scene.add( plane );
 
     objects.push( plane );
+
+    var floorGeo = new THREE.BoxGeometry(1000, 1000, 20);
+    floorGeo.rotateX( - Math.PI / 2 );
+    var floor = new Physijs.BoxMesh( floorGeo, new THREE.MeshBasicMaterial( { visible: false } ), 0 );
+    floor.position.set(0, -10, 0);
+    scene.add(floor);
+
+    objects.push( floor );
 
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
 
@@ -226,7 +235,7 @@ window.scope = window.scope || {};
 
       } else {
 
-        var voxel = new THREE.Mesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ) );
+        var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
         voxel.position.copy( intersect.point ).add( intersect.face.normal );
         voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
         scene.add( voxel );
@@ -285,6 +294,7 @@ window.scope = window.scope || {};
   }
 
   function render() {
+    scene.simulate();
     renderer.render( scene, camera );
     //requestAnimationFrame(render);
   }

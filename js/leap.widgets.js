@@ -133,13 +133,6 @@
 
       });
     })
-    .use('playback', {
-      // This is a compressed JSON file of preprecorded frame data
-      recording: sampleRecording,
-      // How long, in ms, between repeating the recording.
-      timeBetweenLoops: 2000,
-      pauseOnHand: true
-    })
     .connect();
 
 
@@ -178,7 +171,7 @@
       }
       hand = frame.hands[0];
       handMesh = hand.data('riggedHand.mesh');
-
+      //Physijs.createMaterial(handMesh);
       //pos = Leap.vec3.clone(hand.palmPosition);
       //offsetDown = Leap.vec3.clone(hand.palmNormal);
       //Leap.vec3.multiply(offsetDown, offsetDown, [30, 30, 30]);
