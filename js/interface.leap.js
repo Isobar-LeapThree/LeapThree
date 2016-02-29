@@ -6,6 +6,21 @@ window.scope = window.scope || {};
     window.controller = controller = new Leap.Controller;
     //window.controls = new THREE.TrackballControls(camera);
 
+    scene.addEventListener('update', function() {
+      scene.simulate( undefined, 2 );
+    });
+    scene.setGravity({x:0,y:10,z:0});
+    window.scene = scene;
+    window.camera = camera;
+    window.renderer = renderer;
+
+    widgets = new LeapWidgets(scene);
+    widgets.initRiggedHand(scope);
+
+    var decreaseButton = widgets.createButton("Decrease", new THREE.Vector3(-100, 200, -110), new THREE.Vector3(100, 70, 30));
+    var increaseButton = widgets.createButton("Increase", new THREE.Vector3(100, 200, -110), new THREE.Vector3(100, 70, 30));
+
+    /*
     controller
       .use('handHold')
       .use('handEntry')
@@ -51,6 +66,7 @@ window.scope = window.scope || {};
       handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
       scope.renderFromLeap();
     }).connect();
+    */
   };
 
 

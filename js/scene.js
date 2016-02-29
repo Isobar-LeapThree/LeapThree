@@ -42,7 +42,9 @@ window.scope = window.scope || {};
     camera.position.z = radious * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
     camera.lookAt( new THREE.Vector3() );
 
-    scene = new THREE.Scene();
+    Physijs.scripts.worker = 'js/lib/physijs_worker.js';
+    scene = new Physijs.Scene();
+    // scene = new THREE.Scene();
 
     var axes = new THREE.AxisHelper(200);
     scene.add(axes);
