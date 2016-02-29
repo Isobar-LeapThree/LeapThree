@@ -15,7 +15,11 @@ window.scope = window.scope || {};
     YELLOW: 0xffea00,
     GREEN: 0x03c20c,
     BLUE: 0x0018ff,
-    RED: 0xff0000
+    RED: 0xff0000,
+    MAGENTA: 0xff08f6,
+    PURPLE: 0x7e00ff,
+    CYAN: 0x00ffea,
+    ORANGE: 0xff6600
   };
 
   var brushColor = colors.GREEN;
@@ -52,7 +56,7 @@ window.scope = window.scope || {};
     // roll-over helpers
 
     var rollOverGeo = new THREE.BoxGeometry( 50, 50, 50 );
-    rollOverMaterial = new THREE.MeshBasicMaterial( { color: colors.RED, opacity: 0.5, transparent: true } );
+    rollOverMaterial = new THREE.MeshBasicMaterial( { color: brushColor, opacity: 0.5, transparent: true } );
     rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
     scene.add( rollOverMesh );
 
@@ -266,10 +270,14 @@ window.scope = window.scope || {};
 
     switch( event.keyCode ) {
 
-      case 49: setBrushColor( colors.RED ); break;
+      case 49: setBrushColor( colors.GREEN ); break;
       case 50: setBrushColor( colors.YELLOW ); break;
       case 51: setBrushColor( colors.BLUE ); break;
-      case 52: setBrushColor( colors.GREEN ); break;
+      case 52: setBrushColor( colors.RED ); break;
+      case 53: setBrushColor( colors.MAGENTA ); break;
+      case 54: setBrushColor( colors.CYAN ); break;
+      case 55: setBrushColor( colors.PURPLE ); break;
+      case 56: setBrushColor( colors.ORANGE ); break;
 
       case 16: isShiftDown = true; break;
 
@@ -302,6 +310,7 @@ window.scope = window.scope || {};
   function setBrushColor( hex ) {
 
     brushColor = hex;
+    rollOverMesh.material = new THREE.MeshBasicMaterial( { color: brushColor, opacity: 0.5, transparent: true } );
     render();
   }
 

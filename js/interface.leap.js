@@ -15,8 +15,8 @@ window.scope = window.scope || {};
     window.renderer = renderer;
 
     widgets = new LeapWidgets(scene);
-    //widgets.initRiggedHand(scope);
-    widgets.initLeapHand();
+    widgets.initRiggedHand(scope);
+    //widgets.initLeapHand();
     /*
     controller
       .use('handHold')
