@@ -138,10 +138,12 @@
 
   };
 
+  LeapWidgets.prototype.cancelHand = function() {
+    // Cancel leap loop here so a new one can be set up
+  };
+
   LeapWidgets.prototype.initRiggedHand = function(scope) {
-    window.controller = controller = new Leap.Controller;
-    //window.controls = new THREE.TrackballControls(camera);
-    controller
+    Leap.loop()
       .use('handHold')
       .use('handEntry')
       .use('riggedHand', {
@@ -187,6 +189,150 @@
       scope.renderFromLeap();
     }).connect();
   }
+
+  LeapWidgets.prototype.initComboHand = function(opts) {
+    opts = opts || {};
+    var scale = opts['scale'] || 1;
+    var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+        new THREE.Euler(Math.PI / 2, 0, 0)
+    );
+    var boneWidthDefault = 10; // TODO not returned by recorder yet.
+
+
+
+    Leap.loop({
+      frame: function() {
+        widgets.update();
+        scene.simulate();
+        renderer.render(scene, camera);
+      },
+      hand: function (hand) {
+
+        hand.fingers.forEach(function (finger) {
+
+          finger.data('boneMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var bonePosition = new THREE.Vector3().fromArray(bone.center()).multiplyScalar(scale);
+            bonePosition.y -= (opts['translateY'] || 130) * scale;
+            bonePosition.x += (opts['translateX'] || 0) * scale;
+            bonePosition.z += (opts['translateZ'] || 80) * scale;
+            mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
+            mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
+            mesh.quaternion.multiply(baseBoneRotation);
+            mesh.__dirtyRotation = true;
+          });
+
+          finger.data('jointMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint).multiplyScalar(scale);
+            jointPosition.y -= 130 * scale;
+            jointPosition.z += 80 * scale;
+            mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
+            mesh.setAngularVelocity(new THREE.Vector3());
+          });
+
+        });
+      }
+    })
+      // these two LeapJS plugins, handHold and handEntry are available from leapjs-plugins, included above.
+      // handHold provides hand.data
+      // handEntry provides handFound/handLost events.
+    .use('handHold')
+    .use('handEntry')
+    .on('handFound', function(hand){
+      hand.fingers.forEach(function (finger, fingerIndex) {
+
+        var boneMeshes = [];
+        var jointMeshes = [];
+
+        finger.bones.forEach(function(bone, boneIndex) {
+          var boneWidth = bone.width || boneWidthDefault;
+          var boneMesh = new Physijs.CylinderMesh(
+              new THREE.CylinderGeometry(boneWidth/2 * scale, boneWidth/2 * scale, (bone.length - boneWidth) * scale),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
+              100
+          );
+          // TODO: why does the thumb have this extra bone? Removing it
+          if (boneIndex === 0 && fingerIndex === 0) {
+            boneMesh.visible = false;
+            boneMesh.mass = 0;
+          }
+          boneMesh.castShadow = true;
+          boneMesh.position.fromArray([0,100,0]);
+          scene.add(boneMesh);
+          boneMeshes.push(boneMesh);
+        });
+
+        for (var i = 0; i < finger.bones.length + 1; i++) {
+          var jointMesh = new Physijs.SphereMesh(
+              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || boneWidthDefault)/2 * scale, 16),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
+              100
+          );
+        //  jointMesh.sticky = (finger.bones.length == i);
+          jointMesh.castShadow = true;
+          jointMesh.position.fromArray([0,100,0]);
+          if (i === 0 && fingerIndex === 0) {
+            jointMesh.visible = false;
+            jointMesh.mass = 0;
+          }
+
+          jointMesh.material.color.setHex(0x0088ce);
+          scene.add(jointMesh);
+          jointMeshes.push(jointMesh);
+        }
+
+
+        finger.data('boneMeshes', boneMeshes);
+        finger.data('jointMeshes', jointMeshes);
+
+      });
+
+    })
+    .on('handLost', function(hand){
+
+      hand.fingers.forEach(function (finger) {
+
+        var boneMeshes = finger.data('boneMeshes');
+        var jointMeshes = finger.data('jointMeshes');
+
+        boneMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        jointMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        finger.data({
+          boneMeshes: null,
+          boneMeshes: null
+        });
+
+      });
+    }).use('riggedHand', {
+      parent: scene,
+      renderer: renderer,
+      scale: 1,
+      position: new THREE.Vector3(0, -300, 0),
+      renderFn: function() {
+        renderer.render(scene, camera);
+        return;
+      },
+      camera: camera,
+      boneColors: function(boneMesh, leapHand) {
+
+        if ((boneMesh.name.indexOf('Finger_0') === 0) || (boneMesh.name.indexOf('Finger_1') === 0)) {
+          return {
+            hue: 0.6,
+            saturation: leapHand.pinchStrength
+          };
+        }
+      }})
+    .connect();
+
+
+  };
 
   LeapWidgets.prototype.createWall = function(position, dimensions) {
     var wall = new Physijs.BoxMesh(

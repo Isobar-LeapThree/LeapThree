@@ -61,7 +61,7 @@ window.scope = window.scope || {};
     scene.add( rollOverMesh );
 
     var guideGeo = new THREE.BoxGeometry( 50, 50, 50 );
-    guideMaterial = new THREE.MeshBasicMaterial( { color: colors.BLUE, wireframe: true } );
+    guideMaterial = new THREE.MeshBasicMaterial( { color: brushColor, opacity: 0.5, transparent: true } );
     guideMesh = new THREE.Mesh( rollOverGeo, guideMaterial );
     guideMesh.position.set(25, 25, 25);
     scene.add( guideMesh );
@@ -270,6 +270,7 @@ window.scope = window.scope || {};
 
     switch( event.keyCode ) {
 
+      // Numbers 1-7
       case 49: setBrushColor( colors.GREEN ); break;
       case 50: setBrushColor( colors.YELLOW ); break;
       case 51: setBrushColor( colors.BLUE ); break;
@@ -279,7 +280,11 @@ window.scope = window.scope || {};
       case 55: setBrushColor( colors.PURPLE ); break;
       case 56: setBrushColor( colors.ORANGE ); break;
 
+      // Shift
       case 16: isShiftDown = true; break;
+
+      // Space
+      case 32: dropBlock(); break;
 
     }
 
@@ -310,8 +315,20 @@ window.scope = window.scope || {};
   function setBrushColor( hex ) {
 
     brushColor = hex;
-    rollOverMesh.material = new THREE.MeshBasicMaterial( { color: brushColor, opacity: 0.5, transparent: true } );
+    rollOverMesh.material = guideMesh.material = new THREE.MeshBasicMaterial( { color: brushColor, opacity: 0.5, transparent: true } );
     render();
+  }
+
+  function dropBlock() {
+    // Only do this if the hand is visible
+    var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
+    voxel.position.copy( scope.leapPosition );
+    voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+    scene.add( voxel );
+
+    output('boxout', vectorToText(voxel.position));
+
+    objects.push( voxel );
   }
 
   function renderFromLeap() {
@@ -326,10 +343,18 @@ window.scope = window.scope || {};
 
       var intersect = intersects[ 0 ];
 
-      scope.leapPosition.y = 0;
+      //scope.leapPosition.y = 0;
+      guideMesh.geometry = new THREE.BoxGeometry(50, scope.leapPosition.y, 50);
+      // var guideGeo = new THREE.BoxGeometry( 50, 50, 50 );
+      guideMaterial = new THREE.MeshBasicMaterial( { color: brushColor, opacity: 0.5, transparent: true } );
+      //scope.leapPosition.y = 0;
       guideMesh.position.copy( scope.leapPosition ).add( intersect.face.normal );
-      guideMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+      //guideMesh.position
+      var box = new THREE.Box3().setFromObject( guideMesh );
+      //console.log( box.min, box.max, box.size() );
 
+      guideMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+      guideMesh.position.y = box.size().y * .5;
       //guideMesh.position.x = scope.leapPosition.x;
       //guideMesh.position.z = scope.leapPosition.z;
     }

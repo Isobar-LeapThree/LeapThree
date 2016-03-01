@@ -16,7 +16,25 @@ window.scope = window.scope || {};
 
     widgets = new LeapWidgets(scene);
     widgets.initRiggedHand(scope);
+
+    document.addEventListener( 'keydown', onDocumentKeyDown, false );
+
+    function onDocumentKeyDown( event ) {
+
+      switch( event.keyCode ) {
+        case 81 :
+          // q
+
+        break
+        default:
+          console.log('[KEYDOWN] uncaught:', event.keyCode);
+        break;
+
+      }
+
+    }
     //widgets.initLeapHand();
+    //widgets.initComboHand();
     /*
     controller
       .use('handHold')
