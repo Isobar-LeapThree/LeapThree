@@ -15,17 +15,25 @@ window.scope = window.scope || {};
     window.renderer = renderer;
 
     widgets = new LeapWidgets(scene);
-    widgets.initRiggedHand(scope);
+    //widgets.initRiggedHand(scope);
+    //widgets.initLeapHand();
+    widgets.initComboHand(scope);
 
     document.addEventListener( 'keydown', onDocumentKeyDown, false );
 
     function onDocumentKeyDown( event ) {
 
       switch( event.keyCode ) {
+        //Q
         case 81 :
-          // q
-
-        break
+          widgets.cancelHand();
+          widgets.initLeapHand()
+        break;
+        //W
+        case 87 :
+          widgets.cancelHand();
+          widgets.initRiggedHand(scope);
+          break;
         default:
           console.log('[KEYDOWN] uncaught:', event.keyCode);
         break;

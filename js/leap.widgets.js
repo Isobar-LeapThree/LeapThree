@@ -11,6 +11,7 @@
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
+    this.controller;
     this.buttons = [];
     this.switches = [];
     this.sliders = [];
@@ -22,7 +23,7 @@
         new THREE.Euler(Math.PI / 2, 0, 0)
     );
     var boneWidthDefault = 10; // TODO not returned by recorder yet.
-    Leap.loop({
+    this.controller = Leap.loop({
       frame: function() {
         widgets.update();
         scene.simulate();
@@ -139,11 +140,18 @@
   };
 
   LeapWidgets.prototype.cancelHand = function() {
-    // Cancel leap loop here so a new one can be set up
+    // Cancel leap loop here so anew one can be set up
+
+    this.controller.on('frame', function(frame){
+
+    });
+
+    this.controller.disconnect();
+    this.controller = null;
   };
 
   LeapWidgets.prototype.initRiggedHand = function(scope) {
-    Leap.loop()
+    this.controller = Leap.loop()
       .use('handHold')
       .use('handEntry')
       .use('riggedHand', {
@@ -310,7 +318,8 @@
         });
 
       });
-    }).use('riggedHand', {
+    })
+    .use('riggedHand', {
       parent: scene,
       renderer: renderer,
       scale: 1,
@@ -328,7 +337,17 @@
             saturation: leapHand.pinchStrength
           };
         }
-      }})
+    }})
+    .on('frame', function(frame){
+      var hand, handMesh;
+      if (!frame.hands[0]) {
+        return;
+      }
+      hand = frame.hands[0];
+      handMesh = hand.data('riggedHand.mesh');
+      handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
+      scope.renderFromLeap();
+    })
     .connect();
 
 
