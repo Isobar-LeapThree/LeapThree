@@ -357,9 +357,14 @@ window.scope = window.scope || {};
     scene.add(cannonBall);
     var cannonForce =
     objects.push(cannonBall);
-    var forcePos = cannon.position.clone().add(scope.leapPosition.clone());
-    forcePos.z *= -1;
-    cannonBall.applyCentralImpulse( forcePos.multiplyScalar(30) );
+    //var forcePos = cannon.position.clone().add(scope.leapPosition.clone());
+    var forcePos = scope.leapPosition.clone();
+    forcePos.z = 500 - forcePos.z;
+    forcePos.multiply(new THREE.Vector3(1, 1, -1));
+    //forcePos.z *= -1;
+    var appliedForce = forcePos.multiplyScalar(20);
+    output('dirout', vectorToText( appliedForce ) );
+    cannonBall.applyCentralImpulse( appliedForce );
   }
 
   function renderFromLeap() {
