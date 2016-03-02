@@ -2,11 +2,11 @@ window.scope = window.scope || {};
 (function(scope){
   var container;
   var camera, scene, renderer;
-  var plane;
+  var plane, cannon, cannonLine;
 
   var mouse, raycaster, isShiftDown, rotationControls = false;
   var mouse3D, isMouseDown = false, onMouseDownPosition,
-  radious = 900, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60;
+  radious = 1200, theta = 0, onMouseDownTheta = 45, phi = 30, onMouseDownPhi = 60;
 
 
   var rollOverMesh, rollOverMaterial, guideguideMesh, guideMaterial;
@@ -112,6 +112,19 @@ window.scope = window.scope || {};
 
     objects.push( floor );
 
+    var cannonGeo = new THREE.CylinderGeometry(25, 25, 100, 20);
+    cannonGeo.applyMatrix( new THREE.Matrix4().makeTranslation(0, 50, 0) );
+    cannon = new THREE.Mesh(cannonGeo, new THREE.MeshLambertMaterial( { color: colors.YELLOW } ) );
+    cannon.position.set( 0, 0, 500);
+
+    scene.add(cannon);
+
+    var cannonLineGeo = new THREE.Geometry();
+    cannonLineGeo.vertices.push(new THREE.Vector3(0,0,0), cannon.position);
+    cannonLine = new THREE.Line( cannonLineGeo, new THREE.LineBasicMaterial( { color: colors.RED } ) );
+    scene.add(cannonLine);
+
+
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
 
     // Lights
@@ -138,7 +151,6 @@ window.scope = window.scope || {};
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     container.appendChild(renderer.domElement);
-
 
     document.addEventListener( 'mousemove', onDocumentMouseMove, false );
     document.addEventListener( 'mousedown', onDocumentMouseDown, false );
@@ -285,6 +297,8 @@ window.scope = window.scope || {};
 
       // Space
       case 32: dropBlock(); break;
+      // Z
+      case 90: shootBlock(); break;
 
     }
 
@@ -321,7 +335,7 @@ window.scope = window.scope || {};
 
   function dropBlock() {
     // Only do this if the hand is visible
-    var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
+    var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshBasicMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
     voxel.position.copy( scope.leapPosition );
     voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
     scene.add( voxel );
@@ -329,6 +343,23 @@ window.scope = window.scope || {};
     output('boxout', vectorToText(voxel.position));
 
     objects.push( voxel );
+  }
+
+  function shootBlock() {
+    var point = cannon.position.clone();
+    cannonLine.geometry.vertices[0] = point;
+    cannonLine.geometry.vertices[1] = scope.leapPosition;
+    cannonLine.geometry.verticesNeedUpdate = true;
+
+    var ballGeo = new THREE.SphereGeometry( 20, 32, 32 );
+    var cannonBall = new Physijs.SphereMesh( ballGeo, new THREE.MeshLambertMaterial({color:brushColor}), 10);
+    cannonBall.position.set( point.x, point.y, point.z );
+    scene.add(cannonBall);
+    var cannonForce =
+    objects.push(cannonBall);
+    var forcePos = cannon.position.clone().add(scope.leapPosition.clone());
+    forcePos.z *= -1;
+    cannonBall.applyCentralImpulse( forcePos.multiplyScalar(30) );
   }
 
   function renderFromLeap() {
@@ -359,8 +390,10 @@ window.scope = window.scope || {};
       //guideMesh.position.z = scope.leapPosition.z;
     }
 
-    // Leap collision
 
+
+    // Leap collision
+    /*
     var vector = scope.leapPosition.clone().unproject( camera );
     var direction = new THREE.Vector3( 0, 0, -1 ).transformDirection( camera.matrixWorld );
     raycaster.set( vector, direction );
@@ -369,8 +402,22 @@ window.scope = window.scope || {};
     if ( l_intersects.length > 0 ) {
       //console.log('LEAP COLLISION');
     }
-
+*/
     output('leapoutput', vectorToText(scope.leapPosition));
+    if(scope.leapPosition) {
+      output('leapoutput', vectorToText(scope.leapPosition));
+      cannon.lookAt(scope.leapPosition);
+      cannon.rotation.x *= Math.PI / 2;
+      cannon.rotation.z *= -1;
+    }
+    if(scope.pointDirection) {
+      output('dirout', directionToAngle(scope.pointDirection));
+      //cannon.geometry.rotation(scope.pointDirection[0], scope.pointDirection[1], scope.pointDirection[2])
+      //cannon.geometry.rotateY(scope.pointDirection[1]);
+      //cannon.rotation.x = scope.pointDirection[1] + Math.PI / 2;
+      //cannon.rotation.z = scope.pointDirection[0];
+    }
+    render();
   }
 
   function output(elId, text) {
@@ -379,6 +426,14 @@ window.scope = window.scope || {};
 
   function vectorToText(vector) {
     return "x: " + Math.floor(vector.x) + ", y: " + Math.floor(vector.y) + ", z: " + Math.floor(vector.z);
+  }
+
+  function directionToAngle(dir) {
+    if(!dir) return "";
+    var x = dir[0];
+    var y = dir[1];
+    var z = dir[2];
+    return "x: " + Math.floor(x * (180 / Math.PI) ) + ", y: " + Math.floor(y * (180 / Math.PI) ) + ", z: " + Math.floor(z * (180 / Math.PI) );
   }
 
   scope.scene = scene;

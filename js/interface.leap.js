@@ -15,9 +15,11 @@ window.scope = window.scope || {};
     window.renderer = renderer;
 
     widgets = new LeapWidgets(scene);
-    //widgets.initRiggedHand(scope);
+    widgets.initRiggedHand(scope);
     //widgets.initLeapHand();
-    widgets.initComboHand(scope);
+    //widgets.initComboHand(scope);
+
+    //widgets.initVirtualHand();
 
     document.addEventListener( 'keydown', onDocumentKeyDown, false );
 

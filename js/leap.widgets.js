@@ -349,6 +349,36 @@
       scope.renderFromLeap();
     })
     .connect();
+  };
+
+  LeapWidgets.prototype.initVirtualHand = function(opts) {
+    opts = opts || {};
+    var scale = opts['scale'] || 1;
+    var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+        new THREE.Euler(Math.PI / 2, 0, 0)
+    );
+    var boneWidthDefault = 10; // TODO not returned by recorder yet.
+    this.controller = Leap.loop({
+      frame: function() {
+        widgets.update();
+        scene.simulate();
+        renderer.render(scene, camera);
+      },
+      hand: function (hand) {
+
+      }
+    }).on('frame', function(frame){
+      document.getElementById("pointout").innerHTML = frame.pointables.length;
+      if(frame.pointables.length > 0) {
+        //console.log("[POINT]", frame.pointables);
+        frame.pointables.forEach(function(pointable, index){
+          if(pointable.tool) debugger;
+        });
+        scope.pointDirection = frame.pointables[0].direction;
+        scope.renderFromLeap();
+      }
+    })
+    .connect();
 
 
   };
