@@ -6,7 +6,7 @@ window.scope = window.scope || {};
 
   var mouse, raycaster, isShiftDown, rotationControls = false;
   var mouse3D, isMouseDown = false, onMouseDownPosition,
-  radious = 1200, theta = 0, onMouseDownTheta = 45, phi = 30, onMouseDownPhi = 60;
+  radious = 1200, theta = 30, onMouseDownTheta = 45, phi = 30, onMouseDownPhi = 60;
 
 
   var rollOverMesh, rollOverMaterial, guideguideMesh, guideMaterial;
@@ -345,6 +345,8 @@ window.scope = window.scope || {};
     objects.push( voxel );
   }
 
+  var timer, cannonBall;
+
   function shootBlock() {
     var point = cannon.position.clone();
     cannonLine.geometry.vertices[0] = point;
@@ -352,19 +354,48 @@ window.scope = window.scope || {};
     cannonLine.geometry.verticesNeedUpdate = true;
 
     var ballGeo = new THREE.SphereGeometry( 20, 32, 32 );
-    var cannonBall = new Physijs.SphereMesh( ballGeo, new THREE.MeshLambertMaterial({color:brushColor}), 10);
+
+    if(cannonBall) {
+      scene.remove(cannonBall)
+      cannonBall = null;
+    }
+
+    cannonBall = new Physijs.SphereMesh( ballGeo, new THREE.MeshLambertMaterial({color:brushColor}), 10);
     cannonBall.position.set( point.x, point.y, point.z );
     scene.add(cannonBall);
-    var cannonForce =
+    //var cannonForce =
     objects.push(cannonBall);
     //var forcePos = cannon.position.clone().add(scope.leapPosition.clone());
     var forcePos = scope.leapPosition.clone();
     forcePos.z = 500 - forcePos.z;
+    forcePos.z *= -1
     forcePos.multiply(new THREE.Vector3(1, 1, -1));
+
+    var ratioV = new THREE.Vector3( 0, 0, 0 );
+    ratioV.z = forcePos.z / forcePos.y;
+    ratioV.x = forcePos.x / forcePos.y;
+    ratioV.y = forcePos.y / forcePos.z;
     //forcePos.z *= -1;
-    var appliedForce = forcePos.multiplyScalar(20);
-    output('dirout', vectorToText( appliedForce ) );
-    cannonBall.applyCentralImpulse( appliedForce );
+    //forcePos.y *= Math.PI * .5;
+    output('dirout', vectorToText( ratioV ) );
+    var appliedForce = ratioV.multiplyScalar(100000);
+    ratioV.z *= -1;
+    //cannonBall.applyCentralImpulse( appliedForce );
+    timer = setInterval(function(){
+      cannonBall.applyCentralForce( appliedForce );
+    }, 1000/60);
+    setTimeout(function(){
+      if(timer) clearInterval(timer);
+    }, 100);
+    setTimeout(function(){
+
+      if(cannonBall) {
+        scene.remove(cannonBall);
+        cannonBall = null;
+      }
+
+    }, 3000);
+
   }
 
   function renderFromLeap() {
