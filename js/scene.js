@@ -2,11 +2,11 @@ window.scope = window.scope || {};
 (function(scope){
   var container;
   var camera, scene, renderer;
-  var plane, cannon, cannonLine;
+  var plane, cannonTimer, cannon, cannonBall, cannonLine, cannonPower = 50000, powerUnit = 1000;
 
   var mouse, raycaster, isShiftDown, rotationControls = false;
   var mouse3D, isMouseDown = false, onMouseDownPosition,
-  radious = 1200, theta = 30, onMouseDownTheta = 45, phi = 30, onMouseDownPhi = 60;
+  radious = 1200, theta = 0, onMouseDownTheta = 45, phi = 45, onMouseDownPhi = 60;
 
 
   var rollOverMesh, rollOverMaterial, guideguideMesh, guideMaterial;
@@ -113,9 +113,10 @@ window.scope = window.scope || {};
     objects.push( floor );
 
     var cannonGeo = new THREE.CylinderGeometry(25, 25, 100, 20);
-    cannonGeo.applyMatrix( new THREE.Matrix4().makeTranslation(0, 50, 0) );
+    cannonGeo.applyMatrix( new THREE.Matrix4().makeRotationX(Math.PI / 2) );
+    cannonGeo.applyMatrix( new THREE.Matrix4().makeTranslation(0, 0, 50) );
     cannon = new THREE.Mesh(cannonGeo, new THREE.MeshLambertMaterial( { color: colors.YELLOW } ) );
-    cannon.position.set( 0, 0, 500);
+    cannon.position.set( 0, 50, 500);
 
     scene.add(cannon);
 
@@ -299,7 +300,10 @@ window.scope = window.scope || {};
       case 32: dropBlock(); break;
       // Z
       case 90: shootBlock(); break;
-
+      // -
+      case 189: incCannonPower(-powerUnit); break;
+      // +
+      case 187: incCannonPower(powerUnit); break;
     }
 
   }
@@ -333,6 +337,12 @@ window.scope = window.scope || {};
     render();
   }
 
+  function incCannonPower( amount ) {
+    cannonPower += amount;
+    if(cannonPower <= 0 ) cannonPower = powerUnit;
+    output('cannonout', cannonPower);
+  }
+
   function dropBlock() {
     // Only do this if the hand is visible
     var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshBasicMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
@@ -345,14 +355,9 @@ window.scope = window.scope || {};
     objects.push( voxel );
   }
 
-  var timer, cannonBall;
-
   function shootBlock() {
-    var point = cannon.position.clone();
-    cannonLine.geometry.vertices[0] = point;
-    cannonLine.geometry.vertices[1] = scope.leapPosition;
-    cannonLine.geometry.verticesNeedUpdate = true;
 
+    var point = cannon.position.clone();
     var ballGeo = new THREE.SphereGeometry( 20, 32, 32 );
 
     if(cannonBall) {
@@ -360,8 +365,8 @@ window.scope = window.scope || {};
       cannonBall = null;
     }
 
-    cannonBall = new Physijs.SphereMesh( ballGeo, new THREE.MeshLambertMaterial({color:brushColor}), 10);
-    cannonBall.position.set( point.x, point.y, point.z );
+    cannonBall = new Physijs.SphereMesh( ballGeo, new THREE.MeshLambertMaterial({color:brushColor}), 50);
+    cannonBall.position.set( point.x, 50, point.z );
     scene.add(cannonBall);
     //var cannonForce =
     objects.push(cannonBall);
@@ -378,15 +383,17 @@ window.scope = window.scope || {};
     //forcePos.z *= -1;
     //forcePos.y *= Math.PI * .5;
     output('dirout', vectorToText( ratioV ) );
-    var appliedForce = ratioV.multiplyScalar(100000);
+    var appliedForce = ratioV.multiplyScalar(cannonPower);
     ratioV.z *= -1;
-    //cannonBall.applyCentralImpulse( appliedForce );
-    timer = setInterval(function(){
+    cannonBall.applyCentralImpulse( appliedForce );
+    //cannonBall.rotation.set(0, Math.PI / 2 , 1);
+    //cannonBall.applyImpulse(new THREE.Vector3(0, 0, -10000), new THREE.Vector3(0, 0, 0) );
+    /*cannonTimer = setInterval(function(){
       cannonBall.applyCentralForce( appliedForce );
     }, 1000/60);
     setTimeout(function(){
-      if(timer) clearInterval(timer);
-    }, 100);
+      if(cannonTimer) clearInterval(cannonTimer);
+    }, 100);*/
     setTimeout(function(){
 
       if(cannonBall) {
@@ -426,6 +433,11 @@ window.scope = window.scope || {};
       //guideMesh.position.z = scope.leapPosition.z;
     }
 
+    cannonLine.geometry.vertices[0] = cannon.position;
+    cannonLine.geometry.vertices[1] = scope.leapPosition;
+    cannonLine.geometry.verticesNeedUpdate = true;
+
+
 
 
     // Leap collision
@@ -443,8 +455,8 @@ window.scope = window.scope || {};
     if(scope.leapPosition) {
       output('leapoutput', vectorToText(scope.leapPosition));
       cannon.lookAt(scope.leapPosition);
-      cannon.rotation.x *= Math.PI / 2;
-      cannon.rotation.z *= -1;
+      //cannon.rotation.x -= 2;
+      //cannon.rotation.z *= -1;
     }
     if(scope.pointDirection) {
       output('dirout', directionToAngle(scope.pointDirection));
