@@ -194,7 +194,7 @@
       //handMesh.scenePosition(pos, scope.light1position);
       //if(scope.activeBlock)
       handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
-      scope.renderFromLeap();
+      //scope.renderFromLeap();
     }).connect();
   }
 
@@ -346,7 +346,7 @@
       hand = frame.hands[0];
       handMesh = hand.data('riggedHand.mesh');
       handMesh.scenePosition(hand.indexFinger.tipPosition, scope.leapPosition);
-      scope.renderFromLeap();
+      //scope.renderFromLeap();
     })
     .connect();
   };
@@ -375,7 +375,7 @@
           if(pointable.tool) debugger;
         });
         scope.pointDirection = frame.pointables[0].direction;
-        scope.renderFromLeap();
+        //scope.renderFromLeap();
       }
     })
     .connect();

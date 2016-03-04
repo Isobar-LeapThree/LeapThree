@@ -2,7 +2,10 @@ window.scope = window.scope || {};
 (function(scope){
   var container;
   var camera, scene, renderer;
-  var plane, cannonTimer, cannon, cannonBall, cannonLine, cannonPower = 50000, powerUnit = 1000;
+  var plane;
+  var gravity = 1000;
+  var cannonTimer, cannon, cannonBall, cannonLine, cannonPower = 50000, powerUnit = 1000;
+  var target, targetMass = 0;
 
   var mouse, raycaster, isShiftDown, rotationControls = false;
   var mouse3D, isMouseDown = false, onMouseDownPosition,
@@ -19,8 +22,14 @@ window.scope = window.scope || {};
     MAGENTA: 0xff08f6,
     PURPLE: 0x7e00ff,
     CYAN: 0x00ffea,
-    ORANGE: 0xff6600
+    ORANGE: 0xff6600,
+    WHITE: 0xffffff
   };
+
+  function randomColor() {
+    var c = [colors.YELLOW,colors.GREEN,colors.BLUE,colors.RED,colors.MAGENTA,colors.PURPLE,colors.CYAN,colors.ORANGE]
+    return _.shuffle(c).pop();
+  }
 
   var brushColor = colors.GREEN;
   var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
@@ -48,10 +57,8 @@ window.scope = window.scope || {};
 
     Physijs.scripts.worker = 'js/lib/physijs_worker.js';
     scene = new Physijs.Scene();
+    scene.setGravity({x:0,y:-gravity,z:0});
     // scene = new THREE.Scene();
-
-    var axes = new THREE.AxisHelper(200);
-    scene.add(axes);
 
     // roll-over helpers
 
@@ -86,9 +93,7 @@ window.scope = window.scope || {};
 
     }
 
-    var material = new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } );
-
-    var line = new THREE.LineSegments( geometry, material );
+    var line = new THREE.LineSegments( geometry, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
     scene.add( line );
 
     //
@@ -96,6 +101,7 @@ window.scope = window.scope || {};
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
+    // Floor
     var geometry = new THREE.PlaneGeometry( 1000, 1000 );
     geometry.rotateX( - Math.PI / 2 );
 
@@ -112,11 +118,11 @@ window.scope = window.scope || {};
 
     objects.push( floor );
 
-    var cannonGeo = new THREE.CylinderGeometry(25, 25, 100, 20);
+    var cannonGeo = new THREE.CylinderGeometry(20, 20, 100, 20);
     cannonGeo.applyMatrix( new THREE.Matrix4().makeRotationX(Math.PI / 2) );
     cannonGeo.applyMatrix( new THREE.Matrix4().makeTranslation(0, 0, 50) );
     cannon = new THREE.Mesh(cannonGeo, new THREE.MeshLambertMaterial( { color: colors.YELLOW } ) );
-    cannon.position.set( 0, 50, 500);
+    cannon.position.set(0, 50, 500);
 
     scene.add(cannon);
 
@@ -125,6 +131,37 @@ window.scope = window.scope || {};
     cannonLine = new THREE.Line( cannonLineGeo, new THREE.LineBasicMaterial( { color: colors.RED } ) );
     scene.add(cannonLine);
 
+    //target
+    target = new Physijs.CylinderMesh(
+                new THREE.CylinderGeometry(100, 100, 20, 24),
+                new THREE.MeshLambertMaterial( { color: colors.WHITE } ), targetMass
+             );
+    var circ = new Physijs.CylinderMesh(
+                new THREE.CylinderGeometry(70, 70, 5, 24),
+                new THREE.MeshLambertMaterial( { color: colors.BLUE } ), 0
+             );
+    circ.position.set( 0, 10, 0 );
+    circ.name = "ring";
+    //circ.addEventListener('collision', targetCollision);
+    target.add(circ);
+
+    circ = new Physijs.CylinderMesh(
+                new THREE.CylinderGeometry(30, 30, 5, 24),
+                new THREE.MeshLambertMaterial( { color: colors.YELLOW } ), 0
+             );
+    circ.position.set( 0, 15, 0 );
+    circ.name = "bullseye";
+    target.add(circ);
+
+    target.applyMatrix( new THREE.Matrix4().makeRotationX(Math.PI / 2) );
+    target.position.set(0, 200, -600);
+    scene.add(target);
+
+    target.addEventListener('collision', targetCollision);
+
+    buildWall(-500, -300, 6, 4);
+
+    buildWall(50, 100, 6, 3);
 
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
 
@@ -159,7 +196,7 @@ window.scope = window.scope || {};
     document.addEventListener( 'keydown', onDocumentKeyDown, false );
     document.addEventListener( 'keyup', onDocumentKeyUp, false );
     //document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
-
+    //scene.addEventListener('update', simulate);
     //
 
     window.addEventListener( 'resize', onWindowResize, false );
@@ -173,7 +210,7 @@ window.scope = window.scope || {};
 
     renderer.setSize( window.innerWidth, window.innerHeight );
 
-    render();
+    //render();
 
   }
 
@@ -214,7 +251,7 @@ window.scope = window.scope || {};
 
     }
 
-    render();
+    //render();
 
   }
 
@@ -263,7 +300,7 @@ window.scope = window.scope || {};
 
       }
 
-      render();
+      //render();
 
     }
 
@@ -310,7 +347,7 @@ window.scope = window.scope || {};
 
   function onDocumentKeyUp( event ) {
 
-    switch( event.keyCode ) {
+    switch( event.keyCodrendere ) {
 
       case 16: isShiftDown = false; break;
 
@@ -325,9 +362,15 @@ window.scope = window.scope || {};
   }
 
   function render() {
+    moveTarget()
+    renderFromLeap();
     scene.simulate();
     renderer.render( scene, camera );
-    //requestAnimationFrame(render);
+    requestAnimationFrame(render);
+  }
+
+  function simulate() {
+    scene.simulate( undefined, 2 );
   }
 
   function setBrushColor( hex ) {
@@ -343,9 +386,37 @@ window.scope = window.scope || {};
     output('cannonout', cannonPower);
   }
 
+  var targetDir = 1;
+  var targetSpeed = 1;
+  var tarSpot = 0;
+  function moveTarget() {
+    if(!target) return;
+    //target.translateX(targetSpeed * targetDir);
+    var cPos = target.position.clone();
+    //target.position.set( targetSpeed * targetDir, cPos.y, cPos.z );
+    //target.setLinearVelocity(new THREE.Vector3(targetSpeed * targetDir , 17 , 0));
+    if(cPos.x > 500) targetDir = -1;
+    if(cPos.x < -500) targetDir = 1;
+    /*if(targetDir > 0) {
+
+      console.log("[target +]", target.position.x);
+
+    } else {
+      //target.position.x -= targetSpeed;
+      console.log("[target +]", target.position.x);
+      if(target.position.x < -500) targetDir = 1;
+    }*/
+
+  }
+
+  function targetCollision(other_object, linear_velocity, angular_velocity) {
+    console.log('[HIT TARGET]', this.name, other_object);
+  }
+
+
   function dropBlock() {
     // Only do this if the hand is visible
-    var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshBasicMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
+    var voxel = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
     voxel.position.copy( scope.leapPosition );
     voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
     scene.add( voxel );
@@ -355,14 +426,14 @@ window.scope = window.scope || {};
     objects.push( voxel );
   }
 
+  var shotBalls = [];
   function shootBlock() {
 
     var point = cannon.position.clone();
-    var ballGeo = new THREE.SphereGeometry( 20, 32, 32 );
+    var ballGeo = new THREE.SphereGeometry( 20, 8, 8 );
 
-    if(cannonBall) {
-      scene.remove(cannonBall)
-      cannonBall = null;
+    if(shotBalls.length > 5) {
+      scene.remove(shotBalls.shift());
     }
 
     cannonBall = new Physijs.SphereMesh( ballGeo, new THREE.MeshLambertMaterial({color:brushColor}), 50);
@@ -370,6 +441,7 @@ window.scope = window.scope || {};
     scene.add(cannonBall);
     //var cannonForce =
     objects.push(cannonBall);
+    shotBalls.push(cannonBall);
     //var forcePos = cannon.position.clone().add(scope.leapPosition.clone());
     var forcePos = scope.leapPosition.clone();
     forcePos.z = 500 - forcePos.z;
@@ -386,23 +458,23 @@ window.scope = window.scope || {};
     var appliedForce = ratioV.multiplyScalar(cannonPower);
     ratioV.z *= -1;
     cannonBall.applyCentralImpulse( appliedForce );
-    //cannonBall.rotation.set(0, Math.PI / 2 , 1);
-    //cannonBall.applyImpulse(new THREE.Vector3(0, 0, -10000), new THREE.Vector3(0, 0, 0) );
-    /*cannonTimer = setInterval(function(){
-      cannonBall.applyCentralForce( appliedForce );
-    }, 1000/60);
-    setTimeout(function(){
-      if(cannonTimer) clearInterval(cannonTimer);
-    }, 100);*/
-    setTimeout(function(){
+  }
 
-      if(cannonBall) {
-        scene.remove(cannonBall);
-        cannonBall = null;
+  function buildWall(startX, startZ, width, height) {
+
+    var wall = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: brushColor, overdraw: 0.5 } ), 100 );
+    //voxel.position.copy( scope.leapPosition );
+    //voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+    //scene.add( voxel );
+    var _vox;
+    for(var h = 0; h < height; h++){
+      for(var w = 1; w < width; w++) {
+        _vox = new Physijs.BoxMesh( cubeGeometry, new THREE.MeshLambertMaterial( { color: randomColor(), overdraw: 0.5 } ), 100 );
+        _vox.position.set(startX + (50 * w), 50 * h, startZ).addScalar( 25 );
+        scene.add(_vox);
       }
-
-    }, 3000);
-
+    }
+    //scene.add(wall);
   }
 
   function renderFromLeap() {
@@ -465,7 +537,7 @@ window.scope = window.scope || {};
       //cannon.rotation.x = scope.pointDirection[1] + Math.PI / 2;
       //cannon.rotation.z = scope.pointDirection[0];
     }
-    render();
+    //render();
   }
 
   function output(elId, text) {
